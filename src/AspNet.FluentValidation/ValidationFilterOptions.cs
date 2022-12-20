@@ -12,7 +12,7 @@ public sealed class ValidationFilterOptions
     /// <summary>
     /// Gets or sets the delegate used to determine whether the endpoint parameter is validateable
     /// </summary>
-    public ValidationStrategy ShouldValidate { get; set; } = ValidationStrategies.HasValidationMetadata;
+    public ValidationStrategy ShouldValidate { get; set; } = ValidationStrategies.HasValidateAttribute;
 
     /// <summary>
     /// Gets or sets the factory used to create a HTTP result when validation fails. Defaults to a HTTP 422 Validation Problem.

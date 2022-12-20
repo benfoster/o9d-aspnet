@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E5085C8-F9C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNet.FluentValidation", "src\AspNet.FluentValidation\AspNet.FluentValidation.csproj", "{F7ADFC81-AD04-47BE-8E76-E4B5E2ECF892}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6E7FB354-6B93-4CE5-BE1F-1322A374FD68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNet.FluentValidation.Tests", "test\AspNet.FluentValidation.Tests\AspNet.FluentValidation.Tests.csproj", "{6CC35956-249E-4F12-970E-40815DC90D18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{F7ADFC81-AD04-47BE-8E76-E4B5E2ECF892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7ADFC81-AD04-47BE-8E76-E4B5E2ECF892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7ADFC81-AD04-47BE-8E76-E4B5E2ECF892}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CC35956-249E-4F12-970E-40815DC90D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CC35956-249E-4F12-970E-40815DC90D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CC35956-249E-4F12-970E-40815DC90D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CC35956-249E-4F12-970E-40815DC90D18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F7ADFC81-AD04-47BE-8E76-E4B5E2ECF892} = {6E5085C8-F9C4-4A1A-9FF0-F2EB5AB19018}
+		{6CC35956-249E-4F12-970E-40815DC90D18} = {6E7FB354-6B93-4CE5-BE1F-1322A374FD68}
 	EndGlobalSection
 EndGlobal

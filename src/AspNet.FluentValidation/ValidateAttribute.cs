@@ -4,6 +4,6 @@ namespace O9d.AspNet.FluentValidation;
 /// Attribute used to indicate an input parameter or class should be validated
 /// </summary>
 [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-public class ValidateAttribute : Attribute
+public sealed class ValidateAttribute : Attribute
 {
 }

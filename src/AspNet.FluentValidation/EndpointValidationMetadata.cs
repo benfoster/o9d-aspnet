@@ -3,7 +3,7 @@ namespace O9d.AspNet.FluentValidation;
 /// <summary>
 /// Marker metadata used to indicate that the endpoint input parameter should be validated
 /// </summary>
-public class EndpointValidationMetadata
+public sealed class EndpointValidationMetadata
 {
     public EndpointValidationMetadata(Type[] typesToValidate)
     {

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>O9d.AspNet.FluentValidation</RootNamespace>
+    <AssemblyName>O9d.AspNet.FluentValidation</AssemblyName>
+    <PackageId>O9d.AspNet.FluentValidation</PackageId>
+    <Description>Fluent Validation extensions for ASP.NET Core Minimal APIs</Description>
+    <PackageIcon>icon.png</PackageIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    <PackageReference Include="MinVer" Version="4.2.0" PrivateAssets="All"/>
+    <PackageReference Include="FluentValidation" Version="[11.0,12.0)"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>

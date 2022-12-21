@@ -10,6 +10,8 @@ For more information on the motivation behind this filter, see [this blog post](
 
 ### Installation
 
+Install from [Nuget](https://www.nuget.org/packages/O9d.AspNet.FluentValidation).
+
 ```
 dotnet add package O9d.AspNet.FluentValidation
 ```

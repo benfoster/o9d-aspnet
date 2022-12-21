@@ -1,6 +1,6 @@
-# o9d-aspnet
+# ASP.NET Extensions
 
-Extensions for ASP.NET Core.
+Opinionated extensions for ASP.NET Core.
 
 ## O9d.AspNet.FluentValidation
 

@@ -104,7 +104,7 @@ public class ValidationFilterTests
     }
 
     [Fact]
-    public async Task Validates_with_derived_strategy()
+    public async Task Validates_with_type_strategy()
     {
         using var app = await CreateApplication(
             app =>

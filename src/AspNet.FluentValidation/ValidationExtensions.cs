@@ -1,9 +1,9 @@
 using System.Reflection;
 using FluentValidation;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using O9d.AspNet.FluentValidation;
 
-namespace O9d.AspNet.FluentValidation;
+namespace Microsoft.AspNetCore.Builder;
 
 public static class ValidationExtensions
 {

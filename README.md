@@ -6,6 +6,8 @@ Opinionated extensions for ASP.NET Core.
 
 This package includes a validation filter that can be used with ASP.NET Minimal APIs to automatically validate incoming requests using [FluentValidation](https://github.com/FluentValidation/FluentValidation).
 
+For more information on the motivation behind this filter, see [this blog post](https://benfoster.io/blog/minimal-api-validation-endpoint-filters/).
+
 ### Installation
 
 ```

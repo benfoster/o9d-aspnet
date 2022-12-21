@@ -30,7 +30,7 @@ Automatic validation is opt-in and defaults to a strategy that uses the provided
 ```c#
 group.MapPost("/things", ([Validate] DoSomething _) => Results.Ok());
 
-public class DoSomething : IValidateable
+public class DoSomething
 {
     public string? Name { get; set; }
 
@@ -44,7 +44,7 @@ public class DoSomething : IValidateable
 }
 ```
 
-If the request parameter is not valid, by default, a `ValidationProblem` is returned with the HTTP status code `422 - Unprocessable Entity`:
+If the request parameter is not valid, by default, a `ValidationProblem` is returned with the HTTP status code `422 - Unprocessable Entity` 
 
 ```json
 {

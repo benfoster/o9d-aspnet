@@ -19,7 +19,8 @@ public static class ValidationStrategies
     /// Validation strategy that checks for a presence of the <see cref="ValidateAttribute"/>
     /// </summary>
     public static readonly ValidationStrategy HasValidateAttribute = (pi, _)
-        => pi.GetCustomAttribute<ValidateAttribute>(true) is not null;
+        => pi.GetCustomAttribute<ValidateAttribute>(true) is not null
+            || pi.ParameterType.GetCustomAttribute<ValidateAttribute>(true) is not null;
 
     /// <summary>
     /// Validation strategy that checks for the presence of <see cref="EndpointValidationMetadata"/> metadata on the endpoint.
@@ -38,9 +39,9 @@ public static class ValidationStrategies
     };
 
     /// <summary>
-    /// Creates a validation strategy that checks if the parameter type derives from the specified type
+    /// Creates a validation strategy that checks if the parameter type implements or derives the specified type
     /// </summary>
-    /// <typeparam name="T">The base type to check</typeparam>
-    public static ValidationStrategy DerivesFrom<T>()
+    /// <typeparam name="T">The type to check</typeparam>
+    public static ValidationStrategy TypeImplements<T>()
         => (pi, _) => pi.ParameterType.IsAssignableTo(typeof(T));
 }

@@ -14,10 +14,10 @@ public class ValidationFilterTests
     public async void Skips_validation_without_filter()
     {
         using var app = await CreateApplication(app
-            => app.MapPost("/things", (DoSomethingRequest _) => Results.Ok()));
+            => app.MapPost("/things", (DoSomething _) => Results.Ok()));
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
 
         Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
     }
@@ -31,13 +31,13 @@ public class ValidationFilterTests
                 var group = app.MapGroup("/")
                     .WithValidationFilter(); // Uses attribute strategy by default
 
-                group.MapPost("/things", ([Validate] DoSomethingRequest _) => Results.Ok());
+                group.MapPost("/things", ([Validate] DoSomething _) => Results.Ok());
             },
-            services => services.AddScoped<IValidator<DoSomethingRequest>, DoSomethingRequest.Validator>()
+            services => services.AddScoped<IValidator<DoSomething>, DoSomething.Validator>()
         );
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
@@ -49,14 +49,14 @@ public class ValidationFilterTests
             app =>
             {
                 var group = app.MapGroup("/")
-                    .WithValidationFilter(); // Uses attribute strategy by default
+                    .WithValidationFilter();
 
-                group.MapPost("/things", ([Validate] DoSomethingRequest _) => Results.Ok());
+                group.MapPost("/things", ([Validate] DoSomething _) => Results.Ok());
             }
         );
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -69,15 +69,15 @@ public class ValidationFilterTests
             {
                 var group = app.MapGroup("/")
                     .WithValidationFilter(options => options.ShouldValidate = ValidationStrategies.HasValidationMetadata)
-                    .RequireValidation(typeof(DoSomethingRequest));
+                    .RequireValidation(typeof(DoSomething));
 
-                group.MapPost("/things", (DoSomethingRequest _) => Results.Ok());
+                group.MapPost("/things", (DoSomething _) => Results.Ok());
             },
-            services => services.AddScoped<IValidator<DoSomethingRequest>, DoSomethingRequest.Validator>()
+            services => services.AddScoped<IValidator<DoSomething>, DoSomething.Validator>()
         );
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
@@ -92,13 +92,13 @@ public class ValidationFilterTests
                     .WithValidationFilter(options => options.ShouldValidate = ValidationStrategies.HasValidationMetadata)
                     .RequireValidation(Array.Empty<Type>());
 
-                group.MapPost("/things", (DoSomethingRequest _) => Results.Ok());
+                group.MapPost("/things", (DoSomething _) => Results.Ok());
             },
-            services => services.AddScoped<IValidator<DoSomethingRequest>, DoSomethingRequest.Validator>()
+            services => services.AddScoped<IValidator<DoSomething>, DoSomething.Validator>()
         );
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -110,15 +110,55 @@ public class ValidationFilterTests
             app =>
             {
                 var group = app.MapGroup("/")
-                    .WithValidationFilter(options => options.ShouldValidate = ValidationStrategies.DerivesFrom<IValidateable>());
+                    .WithValidationFilter(options => options.ShouldValidate = ValidationStrategies.TypeImplements<IValidateable>());
 
-                group.MapPost("/things", (DoSomethingRequest _) => Results.Ok());
+                group.MapPost("/things", (DoSomething _) => Results.Ok());
             },
-            services => services.AddScoped<IValidator<DoSomethingRequest>, DoSomethingRequest.Validator>()
+            services => services.AddScoped<IValidator<DoSomething>, DoSomething.Validator>()
         );
 
         using var httpResponse
-            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomethingRequest());
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task Can_override_validation_result()
+    {
+        using var app = await CreateApplication(
+            app =>
+            {
+                var group = app.MapGroup("/")
+                    .WithValidationFilter(options => options.InvalidResultFactory = _ => Results.BadRequest());
+
+                group.MapPost("/things", ([Validate] DoSomething _) => Results.Ok());
+            },
+            services => services.AddScoped<IValidator<DoSomething>, DoSomething.Validator>()
+        );
+
+        using var httpResponse
+            = await app.GetTestClient().PostAsJsonAsync("/things", new DoSomething());
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async void Validates_when_using_class_attribute()
+    {
+        using var app = await CreateApplication(
+            app =>
+            {
+                var group = app.MapGroup("/")
+                    .WithValidationFilter();
+
+                group.MapPost("/things", (AttributedThing _) => Results.Ok());
+            },
+            services => services.AddScoped<IValidator<AttributedThing>, AttributedThing.Validator>()
+        );
+
+        using var httpResponse
+            = await app.GetTestClient().PostAsJsonAsync("/things", new AttributedThing());
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
@@ -137,11 +177,25 @@ public class ValidationFilterTests
         return app;
     }
 
-    public class DoSomethingRequest : IValidateable
+    public class DoSomething : IValidateable
     {
         public string? Name { get; set; }
 
-        public class Validator : AbstractValidator<DoSomethingRequest>
+        public class Validator : AbstractValidator<DoSomething>
+        {
+            public Validator()
+            {
+                RuleFor(x => x.Name).NotEmpty();
+            }
+        }
+    }
+
+    [Validate]
+    public class AttributedThing : IValidateable
+    {
+        public string? Name { get; set; }
+
+        public class Validator : AbstractValidator<AttributedThing>
         {
             public Validator()
             {

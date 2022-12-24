@@ -119,8 +119,7 @@ public static class ValidationExtensions
                 };
 
                 // If the ValidationStrategy delegate changes to return the validateable types
-                // then support for System.Text.Json polymorphic deserialization then
-                // this could just be made into a strategy
+                // support for System.Text.Json polymorphic deserialization could then be made into a strategy
                 if (IsPolymorphicType(parameter.ParameterType, out Type[] derivedTypes))
                 {
                     // Create the validator types upfront for each derived type

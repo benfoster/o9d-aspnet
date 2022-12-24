@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -163,6 +164,38 @@ public class ValidationFilterTests
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 
+    [Fact]
+    public async void Validates_using_runtime_type()
+    {
+        using var app = await CreateApplication(
+            app =>
+            {
+                var group = app.MapGroup("/")
+                    .WithValidationFilter();
+
+                group.MapPost("/people", ([Validate] Person _) => Results.Ok());
+            },
+            services =>
+            {
+                services.AddScoped<IValidator<Person>, Person.PersonValidator>();
+                services.AddScoped<IValidator<Student>, Student.StudentValidator>();
+            }
+        );
+
+        static async Task Test(WebApplication app, object request, HttpStatusCode expected)
+        {
+            using var httpResponse
+                = await app.GetTestClient().PostAsJsonAsync("/people", request);
+
+            httpResponse.StatusCode.ShouldBe(expected);
+        }
+
+        await Test(app, new { }, HttpStatusCode.UnprocessableEntity); // Validates with base validator
+        await Test(app, new { Name = "J Doe" }, HttpStatusCode.OK); // Validates with base validator
+        await Test(app, new { Type = "student", Name = "J Doe" }, HttpStatusCode.UnprocessableEntity); // Validates with derived validator
+        await Test(app, new { Type = "student", Name = "J Doe", StudentId = "123abc" }, HttpStatusCode.OK); // Validates with derived validator
+    }
+
     private static async Task<WebApplication> CreateApplication(Action<WebApplication> configureApplication, Action<IServiceCollection>? configureServices = null)
     {
         var builder = WebApplication.CreateBuilder();
@@ -200,6 +233,30 @@ public class ValidationFilterTests
             public Validator()
             {
                 RuleFor(x => x.Name).NotEmpty();
+            }
+        }
+    }
+
+    [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+    [JsonDerivedType(typeof(Student), "student")]
+    public class Person
+    {
+        public string? Name { get; set; }
+        public class PersonValidator : AbstractValidator<Person>
+        {
+            public PersonValidator() => RuleFor(x => x.Name).NotEmpty();
+        }
+    }
+
+    public class Student : Person
+    {
+        public string? StudentId { get; set; }
+        public class StudentValidator : AbstractValidator<Student>
+        {
+            public StudentValidator()
+            {
+                RuleFor(x => x.Name).NotEmpty();
+                RuleFor(x => x.StudentId).NotEmpty();
             }
         }
     }

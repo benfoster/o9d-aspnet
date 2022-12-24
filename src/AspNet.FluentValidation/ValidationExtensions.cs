@@ -2,6 +2,7 @@ using System.Reflection;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using O9d.AspNet.FluentValidation;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.AspNetCore.Builder;
 
@@ -62,9 +63,19 @@ public static class ValidationExtensions
         {
             var argument = invocationContext.Arguments[descriptor.ArgumentIndex];
 
+            Type validatorType = descriptor.ValidatorType;
+
+            // If a type map is provided then attempt to resolve a validator using the runtime type
+            if (descriptor.UseRuntimeType
+                && argument?.GetType() is Type runtimeType
+                && descriptor.TypeMap!.TryGetValue(runtimeType, out Type? runtimeValidatorType))
+            {
+                validatorType = runtimeValidatorType;
+            }
+
             // Resolve the validator
             IValidator? validator
-                = invocationContext.HttpContext.RequestServices.GetService(descriptor.ValidatorType) as IValidator;
+                = invocationContext.HttpContext.RequestServices.GetService(validatorType) as IValidator;
 
             // TODO consider whether we mutate the descriptor to skip if no validator is registered
 
@@ -91,22 +102,42 @@ public static class ValidationExtensions
     {
         ParameterInfo[] parameters = methodInfo.GetParameters();
 
+        static Type CreateValidatorType(Type parameterType)
+            => typeof(IValidator<>).MakeGenericType(parameterType);
+
         for (int i = 0; i < parameters.Length; i++)
         {
             ParameterInfo parameter = parameters[i];
 
             if (options.ShouldValidate(parameter, metadata))
             {
-                Type validatorType = typeof(IValidator<>).MakeGenericType(parameter.ParameterType);
-
-                yield return new ValidateableParameterDescriptor
+                var descriptor = new ValidateableParameterDescriptor
                 {
                     ArgumentIndex = i,
                     ArgumentType = parameter.ParameterType,
-                    ValidatorType = validatorType
+                    ValidatorType = CreateValidatorType(parameter.ParameterType)
                 };
+
+                // If the ValidationStrategy delegate changes to return the validateable types
+                // support for System.Text.Json polymorphic deserialization could then be made into a strategy
+                if (IsPolymorphicType(parameter.ParameterType, out Type[] derivedTypes))
+                {
+                    // Create the validator types upfront for each derived type
+                    descriptor.TypeMap = derivedTypes.ToDictionary(t => t, t => CreateValidatorType(t));
+                }
+
+                yield return descriptor;
             }
         }
+    }
+
+    private static bool IsPolymorphicType(Type parameterType, out Type[] derivedTypes)
+    {
+        derivedTypes = parameterType.GetCustomAttributes<JsonDerivedTypeAttribute>()
+            .Select(attr => attr.DerivedType)
+            .ToArray();
+
+        return derivedTypes.Length > 0;
     }
 
     private class ValidateableParameterDescriptor
@@ -114,5 +145,8 @@ public static class ValidationExtensions
         public required int ArgumentIndex { get; init; }
         public required Type ArgumentType { get; init; }
         public required Type ValidatorType { get; init; }
+        public Dictionary<Type, Type>? TypeMap { get; set; }
+
+        public bool UseRuntimeType => TypeMap?.Count > 0;
     }
 }

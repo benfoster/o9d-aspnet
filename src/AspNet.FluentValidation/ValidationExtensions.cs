@@ -74,6 +74,8 @@ public static class ValidationExtensions
                     new ValidationContext<object>(argument)
                 );
 
+				options.ProcessBindingValidations?.Invoke( invocationContext, descriptor.Parameter, validationResult );
+
                 if (!validationResult.IsValid)
                 {
                     return options.InvalidResultFactory(validationResult, descriptor.Parameter);

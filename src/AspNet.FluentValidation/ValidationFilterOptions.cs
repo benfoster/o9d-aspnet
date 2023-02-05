@@ -22,4 +22,10 @@ public sealed class ValidationFilterOptions
 
     private static IResult CreateValidationProblemResult(ValidationResult validationResult, ParameterInfo parameter)
         => Results.ValidationProblem(validationResult.ToDictionary(), statusCode: (int)HttpStatusCode.UnprocessableEntity);
+
+    /// <summary>
+    /// Gets or sets the handler used to process any additional 'model binding' validation.  If any binding validation meta data
+	/// was generated, their error responses can be added to the ValidationResult.
+    /// </summary>
+	public Action<EndpointFilterInvocationContext, ParameterInfo, ValidationResult>? ProcessBindingValidations { get; set; }
 }

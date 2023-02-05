@@ -130,7 +130,7 @@ public class ValidationFilterTests
             app =>
             {
                 var group = app.MapGroup("/")
-                    .WithValidationFilter(options => options.InvalidResultFactory = _ => Results.BadRequest());
+                    .WithValidationFilter(options => options.InvalidResultFactory = ( _, _ ) => Results.BadRequest());
 
                 group.MapPost("/things", ([Validate] DoSomething _) => Results.Ok());
             },

@@ -74,9 +74,11 @@ public static class ValidationExtensions
                     new ValidationContext<object>(argument)
                 );
 
+				options.ProcessBindingValidations?.Invoke( invocationContext, descriptor.Parameter, validationResult );
+
                 if (!validationResult.IsValid)
                 {
-                    return options.InvalidResultFactory(validationResult);
+                    return options.InvalidResultFactory(validationResult, descriptor.Parameter);
                 }
             }
         }
@@ -103,7 +105,8 @@ public static class ValidationExtensions
                 {
                     ArgumentIndex = i,
                     ArgumentType = parameter.ParameterType,
-                    ValidatorType = validatorType
+                    ValidatorType = validatorType,
+                    Parameter = parameter
                 };
             }
         }
@@ -114,5 +117,6 @@ public static class ValidationExtensions
         public required int ArgumentIndex { get; init; }
         public required Type ArgumentType { get; init; }
         public required Type ValidatorType { get; init; }
+        public required ParameterInfo Parameter { get; init; }
     }
 }

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 
@@ -17,8 +18,14 @@ public sealed class ValidationFilterOptions
     /// <summary>
     /// Gets or sets the factory used to create a HTTP result when validation fails. Defaults to a HTTP 422 Validation Problem.
     /// </summary>
-    public Func<ValidationResult, IResult> InvalidResultFactory { get; set; } = CreateValidationProblemResult;
+    public Func<ValidationResult, ParameterInfo, IResult> InvalidResultFactory { get; set; } = CreateValidationProblemResult;
 
-    private static IResult CreateValidationProblemResult(ValidationResult validationResult)
+    private static IResult CreateValidationProblemResult(ValidationResult validationResult, ParameterInfo parameter)
         => Results.ValidationProblem(validationResult.ToDictionary(), statusCode: (int)HttpStatusCode.UnprocessableEntity);
+
+    /// <summary>
+    /// Gets or sets the handler used to process any additional 'model binding' validation.  If any binding validation meta data
+	/// was generated, their error responses can be added to the ValidationResult.
+    /// </summary>
+	public Action<EndpointFilterInvocationContext, ParameterInfo, ValidationResult>? ProcessBindingValidations { get; set; }
 }

@@ -18,6 +18,11 @@ dotnet add package O9d.AspNet.FluentValidation
 
 ### Usage
 
+In your `Program.cs` register the validators as singleton.
+```c#
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Singleton);
+```
+
 Rather than attaching the filter to every endpoint, create a group under which your endpoints are created and add the validation filter:
 
 ```c#
